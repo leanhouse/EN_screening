@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Service Health Screening</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1e40af;
+            --primary-light: #eff6ff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --bg: #f1f5f9;
+            --white: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); padding: 20px; color: var(--text-main); line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--white); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        .header { background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%); color: white; padding: 40px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 700; }
+        .disclaimer-top { 
+            background: #fffbeb; border: 1px solid #fef3c7; color: #92400e; 
+            padding: 12px; margin: 20px 30px 0 30px; border-radius: 12px; font-size: 13px; text-align: center; 
+        }
+
+        .form-content { padding: 30px; }
+        .section { margin-bottom: 45px; padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px; }
+        .section-title { font-weight: 700; font-size: 18px; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .section-number { background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+        .question-block { margin-bottom: 25px; }
+        .question-text { font-weight: 600; font-size: 15px; margin-bottom: 12px; display: block; color: #334155; }
+
+        input[type="text"], input[type="email"], input[type="number"], select { 
+            width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 15px; font-family: 'Inter'; box-sizing: border-box; transition: 0.2s;
+        }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1); }
+
+        .option-list { display: grid; gap: 8px; }
+        .option-item { 
+            display: flex; align-items: center; padding: 12px 15px; 
+            border: 1.5px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 14px;
+        }
+        .option-item:hover { background-color: var(--primary-light); border-color: var(--primary); }
+        .option-item input { margin-right: 12px; transform: scale(1.2); cursor: pointer; }
+
+        .bmi-card { background: var(--primary-light); padding: 15px; border-radius: 16px; text-align: center; margin-top: 15px; display: none; border: 1px dashed var(--primary); }
+        .bmi-value { font-size: 28px; font-weight: 700; color: var(--primary); }
+
+        .btn-submit { background: var(--primary); color: white; width: 100%; padding: 18px; border-radius: 12px; font-size: 18px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); }
+
+        #resultCard { display: none; margin-top: 30px; padding: 30px; border-radius: 20px; text-align: center; }
+        .res-fail { background: #fff1f2; border: 2px solid #fecdd3; color: #9f1239; }
+        .res-warn { background: #fffbeb; border: 2px solid #fef3c7; color: #92400e; }
+        .res-pass { background: #f0fdf4; border: 2px solid #dcfce7; color: #166534; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 25px; }
+        .btn-line { background: #06C755; color: white; text-decoration: none; padding: 15px; border-radius: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-export { background: #475569; color: white; padding: 15px; border-radius: 10px; font-weight: 600; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="captureArea">
+    <div class="header">
+        <h1>Health Screening Assessment</h1>
+    </div>
+
+    <div class="disclaimer-top">
+        <strong>📝 Description:</strong> This assessment is for screening purposes only and is not a medical diagnosis.
+    </div>
+
+    <div class="form-content">
+        <form id="healthForm">
+            
+            <div class="section">
+                <div class="section-title"><span class="section-number">1</span> General Information</div>
+                <div class="question-block"><label>Full Name</label><input type="text" id="name" required></div>
+                <div class="question-block"><label>Email Address</label><input type="email" id="email" required></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="question-block"><label>Gender</label><select id="gender" required><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+                    <div class="question-block"><label>Age</label><input type="number" id="age" required></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="question-block"><label>Height (cm)</label><input type="number" id="height" required oninput="updateBMI()"></div>
+                    <div class="question-block"><label>Weight (kg)</label><input type="number" id="weight" required oninput="updateBMI()"></div>
+                </div>
+                <div id="bmiCard" class="bmi-card">
+                    <div style="font-size: 13px; color: var(--text-sub);">Calculated BMI</div>
+                    <div class="bmi-value" id="bmiVal">0.0</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="section-number">2</span> Pregnancy & Safety</div>
+                <div class="question-block">
+                    <span class="question-text">4. Are you currently pregnant or suspecting pregnancy?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q4" value="fail" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q4" value="0"> No</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">5. Are you planning to become pregnant within 2 months?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q5" value="fail" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q5" value="0"> No</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">6. Are you currently breastfeeding?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q6" value="fail" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q6" value="0"> No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="section-number">3</span> Medical History & Symptoms</div>
+                <div class="question-block">
+                    <span class="question-text">7. Family history of Medullary Thyroid Carcinoma (MTC)?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q7" value="fail" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q7" value="0"> No</label>
+                        <label class="option-item"><input type="radio" name="q7" value="0"> Not Sure</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">8. Have you ever been diagnosed with MEN type 2?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q8" value="fail" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q8" value="0"> No</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">9. Do you currently have any of these symptoms? (Select all that apply)</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="checkbox" name="q9" value="1"> Neck lump/swelling</label>
+                        <label class="option-item"><input type="checkbox" name="q9" value="1"> Chronic hoarseness</label>
+                        <label class="option-item"><input type="checkbox" name="q9" value="1"> Difficulty swallowing</label>
+                        <label class="option-item"><input type="checkbox" name="q9" value="1"> Difficulty breathing</label>
+                        <label class="option-item"><input type="checkbox" name="q9_none" value="0"> None</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="section-number">4</span> Gastrointestinal Health</div>
+                <div class="question-block">
+                    <span class="question-text">10. History of Gastroparesis (delayed stomach emptying)?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q10" value="3" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q10" value="0"> No</label>
+                        <label class="option-item"><input type="radio" name="q10" value="0"> Not Sure</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">11. Do you experience these symptoms regularly?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="checkbox" name="q11" value="2"> Chronic nausea/vomiting</label>
+                        <label class="option-item"><input type="checkbox" name="q11" value="1"> Severe bloating</label>
+                        <label class="option-item"><input type="checkbox" name="q11" value="1"> Severe GERD</label>
+                        <label class="option-item"><input type="checkbox" name="q11_none" value="0"> None</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">12. Have you ever had Pancreatitis?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q12" value="3" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q12" value="0"> No</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">13. History of Gallstones or severe abdominal pain?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q13" value="2" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q13" value="0"> No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="section-number">5</span> Lifestyle & Medications</div>
+                <div class="question-block">
+                    <span class="question-text">14. Do you consume alcohol regularly?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q14" value="0" required> Non-drinker</label>
+                        <label class="option-item"><input type="radio" name="q14" value="0"> Occasionally</label>
+                        <label class="option-item"><input type="radio" name="q14" value="1"> Regularly</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">15. History of severe depression or suicidal ideation?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q15" value="fail" required> Yes</label>
+                        <label class="option-item"><input type="radio" name="q15" value="0"> No</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">16. Current medications? (Select all that apply)</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="checkbox" name="q16" value="2"> Insulin</label>
+                        <label class="option-item"><input type="checkbox" name="q16" value="2"> Blood sugar drugs</label>
+                        <label class="option-item"><input type="checkbox" name="q16" value="1"> Oral contraceptives</label>
+                        <label class="option-item"><input type="checkbox" name="q16" value="2"> Thyroid</label>
+                        <label class="option-item"><input type="checkbox" name="q16" value="2"> Anti-seizure</label>
+                        <label class="option-item"><input type="checkbox" name="q16" value="2"> Blood thinners</label>
+                        <label class="option-item"><input type="checkbox" name="q16_none" value="0"> None</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span class="section-number">6</span> Acknowledgement</div>
+                <div class="question-block">
+                    <span class="question-text">17. Do you understand the potential side effects?</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="checkbox"> Nausea / Vomiting</label>
+                        <label class="option-item"><input type="checkbox"> Diarrhea / Constipation</label>
+                        <label class="option-item"><input type="checkbox"> Loss of appetite</label>
+                        <label class="option-item"><input type="checkbox" required> I understand all of the above</label>
+                    </div>
+                </div>
+                <div class="question-block">
+                    <span class="question-text">18. I confirm that all information is true.</span>
+                    <div class="option-list">
+                        <label class="option-item"><input type="radio" name="q18" value="0" required> Confirm</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-submit" onclick="calculateResult()">Run Assessment</button>
+        </form>
+
+        <div id="resultCard">
+            <h2 id="resTitle"></h2>
+            <div id="resUser" style="margin: 10px 0; font-weight: 700; font-size: 18px;"></div>
+            <p id="resDesc"></p>
+            <div class="btn-group">
+                <button class="btn-export" onclick="saveAsImage()">📸 Save Result as Image</button>
+                <a href="https://lin.ee/j5iWH3R" class="btn-line" target="_blank">💬 Consult Clinical Staff</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateBMI() {
+    const w = document.getElementById('weight').value;
+    const h = document.getElementById('height').value;
+    if(w > 0 && h > 0) {
+        const bmi = (w / ((h/100)**2)).toFixed(1);
+        document.getElementById('bmiVal').innerText = bmi;
+        document.getElementById('bmiCard').style.display = "block";
+        return bmi;
+    }
+    return 0;
+}
+
+function calculateResult() {
+    const form = document.getElementById('healthForm');
+    if(!form.checkValidity()) { alert("Please complete all required fields."); return; }
+
+    const name = document.getElementById('name').value;
+    const bmi = updateBMI();
+    let score = 0;
+    let autoFail = false;
+    const data = new FormData(form);
+
+    ['q4','q5','q6','q7','q8','q15'].forEach(q => { if(data.get(q) === 'fail') autoFail = true; });
+
+    for (let entry of data.entries()) {
+        if(entry[1] !== 'fail' && !isNaN(entry[1])) score += parseInt(entry[1]);
+    }
+
+    const resCard = document.getElementById('resultCard');
+    resCard.style.display = "block";
+    document.getElementById('resUser').innerText = `Patient: ${name} | BMI: ${bmi}`;
+
+    if(autoFail) {
+        resCard.className = "res-fail";
+        document.getElementById('resTitle').innerText = "❌ Not Eligible";
+        document.getElementById('resDesc').innerText = "Based on your high-risk factors, this service is not recommended. Please consult your physician for a professional diagnosis.";
+    } else if(score >= 5) {
+        resCard.className = "res-warn";
+        document.getElementById('resTitle').innerText = "⚠️ Specialist Review Needed";
+        document.getElementById('resDesc').innerText = "Moderate risk factors detected. Our medical team will need to review your case before approval.";
+    } else {
+        resCard.className = "res-pass";
+        document.getElementById('resTitle').innerText = "✅ Preliminary Pass";
+        document.getElementById('resDesc').innerText = "Your screening indicates you are likely eligible. Please proceed to book your final consultation.";
+    }
+    resCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function saveAsImage() {
+    html2canvas(document.getElementById('captureArea')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Result-${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+</script>
+</body>
+</html>
